@@ -3,32 +3,36 @@ import { Link, useNavigate } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, CheckCheck, Copy, Minus, Plus, Share2, ShoppingBasket, Trash2, X } from 'lucide-react';
 import { api } from '../lib/api';
-import { CATEGORIES, CATEGORY_LABELS, UNITS, type ShoppingItem, type ShoppingList } from '../lib/types';
-import { formatQuantity } from '../lib/format';
+import { CATEGORIES, type ShoppingItem, type ShoppingList } from '../lib/types';
+import { formatQuantity, parseUnitWord } from '../lib/format';
+import { useI18n, type Dict, type Lang } from '../lib/i18n';
 import { useToast } from '../components/Toast';
 import { useSelection } from '../lib/selection';
 
 const KEY = ['shopping-list'];
 
-/** "2 kg apples" -> { amount: 2, unit: 'kg', name: 'apples' }, "milk" -> { name: 'milk' } */
+/**
+ * "2 kg apples" -> { amount: 2, unit: 'kg', name: 'apples' }, "2 EL Zucker" -> tbsp,
+ * "3 Eier" -> 3 pieces, "milk" -> { name: 'milk' }
+ */
 export function parseManualItem(text: string) {
   const t = text.trim();
-  const m = t.match(/^(\d+(?:[.,]\d+)?)\s*([a-zA-Z]+\b)?\s+(.+)$/);
+  const m = t.match(/^(\d+(?:[.,]\d+)?)\s*(\p{L}+\.?)\s+(.+)$/u) ?? t.match(/^(\d+(?:[.,]\d+)?)\s*()(.+)$/);
   if (!m) return { name: t, amount: null, unit: null };
   const amount = Number(m[1].replace(',', '.'));
-  const unit = m[2] && (UNITS as readonly string[]).includes(m[2].toLowerCase()) ? m[2].toLowerCase() : null;
+  const unit = m[2] ? parseUnitWord(m[2]) : null;
   const name = unit ? m[3] : `${m[2] ? `${m[2]} ` : ''}${m[3]}`;
   return { name: name.trim(), amount, unit: unit ?? 'piece' };
 }
 
-function listAsText(list: ShoppingList) {
-  const lines = ['Shopping list', ''];
+function listAsText(list: ShoppingList, t: Dict, lang: Lang) {
+  const lines = [t.shop.title, ''];
   for (const cat of CATEGORIES) {
     const items = list.items.filter((i) => i.category === cat && !i.checked);
     if (!items.length) continue;
-    lines.push(CATEGORY_LABELS[cat]);
+    lines.push(t.categories[cat]);
     for (const i of items) {
-      const q = formatQuantity(i.amount, i.unit);
+      const q = formatQuantity(i.amount, i.unit, lang);
       lines.push(`- ${q ? `${q} ` : ''}${i.name}`);
     }
     lines.push('');
@@ -41,6 +45,7 @@ export function ShoppingListPage() {
   const toast = useToast();
   const navigate = useNavigate();
   const selection = useSelection();
+  const { t, lang, tError } = useI18n();
   const list = useQuery({ queryKey: KEY, queryFn: api.shoppingList });
   const [newItem, setNewItem] = useState('');
 
@@ -110,10 +115,10 @@ export function ShoppingListPage() {
 
   const share = async () => {
     if (!list.data) return;
-    const text = listAsText(list.data);
+    const text = listAsText(list.data, t, lang);
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'Shopping list', text });
+        await navigator.share({ title: t.shop.title, text });
         return;
       }
     } catch (e) {
@@ -121,9 +126,9 @@ export function ShoppingListPage() {
     }
     try {
       await navigator.clipboard.writeText(text);
-      toast('Copied to clipboard', 'success');
+      toast(t.shop.copied, 'success');
     } catch {
-      toast('Could not copy the list', 'error');
+      toast(t.shop.copyFailed, 'error');
     }
   };
 
@@ -134,8 +139,8 @@ export function ShoppingListPage() {
     navigate('/');
   };
 
-  if (list.isPending) return <div className="py-20 text-center text-stone-500">Loading…</div>;
-  if (list.isError) return <div className="py-20 text-center text-stone-500">{(list.error as Error).message}</div>;
+  if (list.isPending) return <div className="py-20 text-center text-stone-500">{t.common.loading}</div>;
+  if (list.isError) return <div className="py-20 text-center text-stone-500">{tError((list.error as Error).message)}</div>;
 
   const { items, recipes } = list.data;
   const checkedCount = items.filter((i) => i.checked).length;
@@ -144,16 +149,16 @@ export function ShoppingListPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <h1 className="mr-auto font-display text-2xl font-semibold">Shopping list</h1>
+        <h1 className="mr-auto font-display text-2xl font-semibold">{t.shop.title}</h1>
         {items.length > 0 && (
           <>
             <button className="btn-secondary px-3" onClick={share}>
-              {canShare ? <Share2 size={18} /> : <Copy size={18} />} {canShare ? 'Share' : 'Copy'}
+              {canShare ? <Share2 size={18} /> : <Copy size={18} />} {canShare ? t.shop.share : t.shop.copy}
             </button>
             <button
               className="icon-btn"
-              title="Remove checked items"
-              aria-label="Remove checked items"
+              title={t.shop.clearChecked}
+              aria-label={t.shop.clearChecked}
               disabled={!checkedCount}
               onClick={() => clearChecked.mutate()}
             >
@@ -161,9 +166,9 @@ export function ShoppingListPage() {
             </button>
             <button
               className="icon-btn hover:text-red-600"
-              title="Clear the whole list"
-              aria-label="Clear the whole list"
-              onClick={() => confirm('Clear the whole shopping list?') && clearAll.mutate()}
+              title={t.shop.clearAll}
+              aria-label={t.shop.clearAll}
+              onClick={() => confirm(t.shop.confirmClear) && clearAll.mutate()}
             >
               <Trash2 size={20} />
             </button>
@@ -182,11 +187,11 @@ export function ShoppingListPage() {
           className="input"
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
-          placeholder="Add item, e.g. 2 kg apples"
-          aria-label="Add item"
+          placeholder={t.shop.addPlaceholder}
+          aria-label={t.shop.addItem}
           enterKeyHint="done"
         />
-        <button className="btn-primary px-3" disabled={!newItem.trim() || add.isPending} aria-label="Add item">
+        <button className="btn-primary px-3" disabled={!newItem.trim() || add.isPending} aria-label={t.shop.addItem}>
           <Plus size={20} />
         </button>
       </form>
@@ -194,9 +199,9 @@ export function ShoppingListPage() {
       {recipes.length > 0 && (
         <section className="card mb-5 p-3">
           <div className="mb-2 flex items-center justify-between px-1">
-            <h2 className="text-sm font-semibold tracking-wide text-stone-500 uppercase">From recipes</h2>
+            <h2 className="text-sm font-semibold tracking-wide text-stone-500 uppercase">{t.shop.fromRecipes}</h2>
             <button className="text-sm font-medium text-amber-700 hover:underline dark:text-amber-400" onClick={addMoreRecipes}>
-              Change recipes
+              {t.shop.changeRecipes}
             </button>
           </div>
           <ul className="divide-y divide-stone-900/5 dark:divide-white/5">
@@ -205,16 +210,16 @@ export function ShoppingListPage() {
                 <Link to={`/recipes/${r.recipeId}`} className="flex-1 truncate px-1 font-medium hover:underline">
                   {r.title}
                 </Link>
-                <button className="icon-btn h-8 w-8" onClick={() => changeServings(r.recipeId, r.servings - 1)} aria-label="Fewer servings">
+                <button className="icon-btn h-8 w-8" onClick={() => changeServings(r.recipeId, r.servings - 1)} aria-label={t.servings.fewer}>
                   <Minus size={16} />
                 </button>
                 <span className="w-16 text-center text-sm tabular-nums">
-                  <span className="font-semibold">{r.servings}</span> serv.
+                  <span className="font-semibold">{r.servings}</span> {t.servings.short}
                 </span>
-                <button className="icon-btn h-8 w-8" onClick={() => changeServings(r.recipeId, r.servings + 1)} aria-label="More servings">
+                <button className="icon-btn h-8 w-8" onClick={() => changeServings(r.recipeId, r.servings + 1)} aria-label={t.servings.more}>
                   <Plus size={16} />
                 </button>
-                <button className="icon-btn h-8 w-8" onClick={() => removeRecipe(r.recipeId)} aria-label={`Remove ${r.title}`}>
+                <button className="icon-btn h-8 w-8" onClick={() => removeRecipe(r.recipeId)} aria-label={t.common.remove(r.title)}>
                   <X size={16} />
                 </button>
               </li>
@@ -226,10 +231,10 @@ export function ShoppingListPage() {
       {items.length === 0 ? (
         <div className="py-12 text-center">
           <ShoppingBasket className="mx-auto text-stone-300 dark:text-stone-600" size={56} strokeWidth={1.25} />
-          <p className="mt-3 font-display text-xl text-stone-700 dark:text-stone-200">Your list is empty</p>
-          <p className="mt-1 text-stone-500">Select recipes in the recipe list or add items above.</p>
+          <p className="mt-3 font-display text-xl text-stone-700 dark:text-stone-200">{t.shop.empty}</p>
+          <p className="mt-1 text-stone-500">{t.shop.emptyHint}</p>
           <button className="btn-primary mt-4" onClick={addMoreRecipes}>
-            Choose recipes
+            {t.shop.chooseRecipes}
           </button>
         </div>
       ) : (
@@ -242,7 +247,7 @@ export function ShoppingListPage() {
             return (
               <section key={cat}>
                 <h2 className="mb-1.5 px-1 text-sm font-semibold tracking-wide text-amber-800 uppercase dark:text-amber-400">
-                  {CATEGORY_LABELS[cat]}
+                  {t.categories[cat]}
                 </h2>
                 <ul className="card divide-y divide-stone-900/5 overflow-hidden dark:divide-white/5">
                   {catItems.map((item) => (
@@ -262,8 +267,8 @@ export function ShoppingListPage() {
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className={`block ${item.checked ? 'line-through' : ''}`}>
-                            {formatQuantity(item.amount, item.unit) && (
-                              <span className="font-semibold tabular-nums">{formatQuantity(item.amount, item.unit)} </span>
+                            {formatQuantity(item.amount, item.unit, lang) && (
+                              <span className="font-semibold tabular-nums">{formatQuantity(item.amount, item.unit, lang)} </span>
                             )}
                             {item.name}
                           </span>
@@ -272,7 +277,7 @@ export function ShoppingListPage() {
                           )}
                         </span>
                       </button>
-                      <button className="icon-btn mr-1 h-9 w-9 shrink-0" onClick={() => remove.mutate(item.id)} aria-label={`Remove ${item.name}`}>
+                      <button className="icon-btn mr-1 h-9 w-9 shrink-0" onClick={() => remove.mutate(item.id)} aria-label={t.common.remove(item.name)}>
                         <X size={16} />
                       </button>
                     </li>

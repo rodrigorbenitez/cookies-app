@@ -6,8 +6,10 @@ import { RecipeFormPage } from './pages/RecipeFormPage';
 import { ShoppingListPage } from './pages/ShoppingListPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { CookingModePage } from './pages/CookingModePage';
+import { useI18n } from './lib/i18n';
 
 export function App() {
+  const { t } = useI18n();
   return (
     <Routes>
       <Route path="/recipes/:id/cook" element={<CookingModePage />} />
@@ -20,7 +22,7 @@ export function App() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route
           path="*"
-          element={<p className="py-20 text-center text-stone-500">This page does not exist.</p>}
+          element={<p className="py-20 text-center text-stone-500">{t.notFound}</p>}
         />
       </Route>
     </Routes>

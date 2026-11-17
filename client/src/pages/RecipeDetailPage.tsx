@@ -12,6 +12,7 @@ import { Markdown } from '../components/Markdown';
 import { useToast } from '../components/Toast';
 import { formatTime } from '../lib/format';
 import { useSelection } from '../lib/selection';
+import { useI18n } from '../lib/i18n';
 
 export function RecipeDetailPage() {
   const id = Number(useParams().id);
@@ -22,6 +23,7 @@ export function RecipeDetailPage() {
   const qc = useQueryClient();
   const toast = useToast();
   const selection = useSelection();
+  const { t, lang, tError } = useI18n();
 
   const remove = useMutation({
     mutationFn: () => api.deleteRecipe(id),
@@ -29,20 +31,20 @@ export function RecipeDetailPage() {
       qc.removeQueries({ queryKey: ['recipe', id] });
       qc.invalidateQueries({ queryKey: ['recipes'] });
       qc.invalidateQueries({ queryKey: ['tags'] });
-      toast('Recipe deleted');
+      toast(t.detail.deleted);
       navigate('/');
     },
     onError: (e) => toast((e as Error).message, 'error'),
   });
 
-  if (recipe.isPending) return <div className="py-20 text-center text-stone-500">Loading…</div>;
+  if (recipe.isPending) return <div className="py-20 text-center text-stone-500">{t.common.loading}</div>;
   if (recipe.isError)
     return (
       <div className="py-20 text-center text-stone-500">
-        {(recipe.error as Error).message}
+        {tError((recipe.error as Error).message)}
         <div className="mt-4">
           <Link to="/" className="btn-secondary">
-            Back to recipes
+            {t.detail.backToRecipes}
           </Link>
         </div>
       </div>
@@ -51,19 +53,19 @@ export function RecipeDetailPage() {
   const r = recipe.data;
   const current = servings ?? r.servings;
   const factor = current / r.servings;
-  const time = formatTime(r.prepTime);
+  const time = formatTime(r.prepTime, lang);
 
   return (
     <article className="mx-auto max-w-4xl">
       <div className="mb-3 flex items-center gap-1">
-        <button className="icon-btn -ml-2" onClick={() => (history.length > 1 ? navigate(-1) : navigate('/'))} aria-label="Back">
+        <button className="icon-btn -ml-2" onClick={() => (history.length > 1 ? navigate(-1) : navigate('/'))} aria-label={t.common.back}>
           <ArrowLeft size={20} />
         </button>
         <div className="ml-auto flex gap-1">
           <button
             className="icon-btn"
-            title="Add to shopping list selection"
-            aria-label="Add to shopping list selection"
+            title={t.detail.addToList}
+            aria-label={t.detail.addToList}
             onClick={() => {
               if (!selection.isSelected(r.id)) selection.toggle({ id: r.id, title: r.title, servings: current });
               selection.setActive(true);
@@ -72,14 +74,14 @@ export function RecipeDetailPage() {
           >
             <ShoppingBasket size={20} />
           </button>
-          <Link to={`/recipes/${id}/edit`} className="icon-btn" aria-label="Edit recipe" title="Edit">
+          <Link to={`/recipes/${id}/edit`} className="icon-btn" aria-label={t.detail.editAria} title={t.detail.edit}>
             <Pencil size={20} />
           </Link>
           <button
             className="icon-btn hover:text-red-600"
-            aria-label="Delete recipe"
-            title="Delete"
-            onClick={() => confirm(`Delete “${r.title}”? This cannot be undone.`) && remove.mutate()}
+            aria-label={t.detail.deleteAria}
+            title={t.detail.delete}
+            onClick={() => confirm(t.detail.confirmDelete(r.title)) && remove.mutate()}
           >
             <Trash2 size={20} />
           </button>
@@ -112,24 +114,24 @@ export function RecipeDetailPage() {
       </header>
 
       <Link to={`/recipes/${id}/cook${current !== r.servings ? `?servings=${current}` : ''}`} className="btn-primary mt-5 w-full py-3 text-lg md:w-auto">
-        <ChefHat size={22} /> Start cooking mode
+        <ChefHat size={22} /> {t.detail.startCooking}
       </Link>
 
       <div className="mt-6 grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <section className="card h-fit p-4 md:sticky md:top-20">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <h2 className="font-display text-xl font-semibold">Ingredients</h2>
+            <h2 className="font-display text-xl font-semibold">{t.detail.ingredients}</h2>
             <ServingsStepper value={current} onChange={setServings} />
           </div>
           {r.ingredientGroups.some((g) => g.ingredients.length) ? (
             <IngredientList groups={r.ingredientGroups} factor={factor} />
           ) : (
-            <p className="text-stone-500">No ingredients yet.</p>
+            <p className="text-stone-500">{t.detail.noIngredients}</p>
           )}
         </section>
         <section>
-          <h2 className="mb-2 font-display text-xl font-semibold">Instructions</h2>
-          {r.instructions.trim() ? <Markdown text={r.instructions} /> : <p className="text-stone-500">No instructions yet.</p>}
+          <h2 className="mb-2 font-display text-xl font-semibold">{t.detail.instructions}</h2>
+          {r.instructions.trim() ? <Markdown text={r.instructions} /> : <p className="text-stone-500">{t.detail.noInstructions}</p>}
         </section>
       </div>
     </article>

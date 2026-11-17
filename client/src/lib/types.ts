@@ -4,13 +4,6 @@ export type Unit = (typeof UNITS)[number];
 export const CATEGORIES = ['baking', 'dairy', 'produce', 'spices', 'other'] as const;
 export type Category = (typeof CATEGORIES)[number];
 
-export const CATEGORY_LABELS: Record<Category, string> = {
-  baking: 'Baking',
-  dairy: 'Dairy & eggs',
-  produce: 'Fruit & vegetables',
-  spices: 'Spices',
-  other: 'Other',
-};
 
 export interface RecipeSummary {
   id: number;

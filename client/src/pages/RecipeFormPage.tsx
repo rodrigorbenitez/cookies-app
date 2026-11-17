@@ -11,6 +11,8 @@ import { StarRating } from '../components/StarRating';
 import { Autocomplete } from '../components/Autocomplete';
 import { Markdown } from '../components/Markdown';
 import { useToast } from '../components/Toast';
+import { useI18n } from '../lib/i18n';
+import { unitName } from '../lib/format';
 
 let keySeq = 0;
 const nextKey = () => ++keySeq;
@@ -130,6 +132,7 @@ export function RecipeFormPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const toast = useToast();
+  const { t, tError } = useI18n();
   const tags = useQuery({ queryKey: ['tags'], queryFn: api.tags });
   const catalog = useQuery({ queryKey: ['catalog'], queryFn: api.catalog });
 
@@ -144,14 +147,14 @@ export function RecipeFormPage() {
       qc.invalidateQueries({ queryKey: ['recipes'] });
       qc.invalidateQueries({ queryKey: ['tags'] });
       qc.invalidateQueries({ queryKey: ['catalog'] });
-      toast(editingId ? 'Recipe saved' : 'Recipe created', 'success');
+      toast(editingId ? t.form.saved : t.form.created, 'success');
       navigate(`/recipes/${recipe.id}`, { replace: true });
     },
     onError: (e) => toast((e as Error).message, 'error'),
   });
 
   if (!form) {
-    return <div className="py-20 text-center text-stone-500">{existing.isError ? (existing.error as Error).message : 'Loading…'}</div>;
+    return <div className="py-20 text-center text-stone-500">{existing.isError ? tError((existing.error as Error).message) : t.common.loading}</div>;
   }
 
   const set = (patch: Partial<FormState>) => setForm((f) => (f ? { ...f, ...patch } : f));
@@ -161,7 +164,7 @@ export function RecipeFormPage() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim()) {
-      toast('Please enter a title', 'error');
+      toast(t.form.titleRequired, 'error');
       return;
     }
     save.mutate(toInput(form));
@@ -172,12 +175,12 @@ export function RecipeFormPage() {
   return (
     <form onSubmit={submit} className="mx-auto max-w-3xl">
       <div className="mb-4 flex items-center gap-2">
-        <button type="button" className="icon-btn -ml-2" onClick={() => navigate(-1)} aria-label="Back">
+        <button type="button" className="icon-btn -ml-2" onClick={() => navigate(-1)} aria-label={t.common.back}>
           <ArrowLeft size={20} />
         </button>
-        <h1 className="font-display text-2xl font-semibold">{editingId ? 'Edit recipe' : 'New recipe'}</h1>
+        <h1 className="font-display text-2xl font-semibold">{editingId ? t.form.editTitle : t.form.newTitle}</h1>
         <button type="submit" className="btn-primary ml-auto" disabled={save.isPending}>
-          {save.isPending && <Loader2 size={18} className="animate-spin" />} Save
+          {save.isPending && <Loader2 size={18} className="animate-spin" />} {t.common.save}
         </button>
       </div>
 
@@ -186,21 +189,21 @@ export function RecipeFormPage() {
           <ImagePicker value={form.imagePath} onChange={(imagePath) => set({ imagePath })} />
           <div>
             <label className="label" htmlFor="title">
-              Title
+              {t.form.title}
             </label>
             <input
               id="title"
               className="input text-lg font-semibold"
               value={form.title}
               onChange={(e) => set({ title: e.target.value })}
-              placeholder="e.g. Vanilla crescent cookies"
+              placeholder={t.form.titlePlaceholder}
               required
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="label" htmlFor="servings">
-                Servings
+                {t.servings.label}
               </label>
               <input
                 id="servings"
@@ -214,7 +217,7 @@ export function RecipeFormPage() {
             </div>
             <div>
               <label className="label" htmlFor="prepTime">
-                Time (minutes)
+                {t.form.time}
               </label>
               <input
                 id="prepTime"
@@ -224,23 +227,23 @@ export function RecipeFormPage() {
                 min={0}
                 value={form.prepTime}
                 onChange={(e) => set({ prepTime: e.target.value })}
-                placeholder="e.g. 45"
+                placeholder={t.form.timePlaceholder}
               />
             </div>
           </div>
           <div>
-            <span className="label">Rating</span>
+            <span className="label">{t.form.rating}</span>
             <StarRating value={form.rating} onChange={(rating) => set({ rating })} size={26} className="-ml-1" />
           </div>
           <div>
-            <span className="label">Tags</span>
-            <TagInput value={form.tags} onChange={(t) => set({ tags: t })} suggestions={tags.data?.map((t) => t.tag) ?? []} />
+            <span className="label">{t.form.tags}</span>
+            <TagInput value={form.tags} onChange={(next) => set({ tags: next })} suggestions={tags.data?.map((x) => x.tag) ?? []} />
           </div>
         </section>
 
         <section>
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="font-display text-xl font-semibold">Ingredients</h2>
+            <h2 className="font-display text-xl font-semibold">{t.detail.ingredients}</h2>
           </div>
           <div className="space-y-4">
             {form.groups.map((g, gi) => (
@@ -250,10 +253,10 @@ export function RecipeFormPage() {
                     className="input flex-1 font-semibold"
                     value={g.name}
                     onChange={(e) => updateGroup(g.key, (x) => ({ ...x, name: e.target.value }))}
-                    placeholder={form.groups.length > 1 ? 'Group name, e.g. Filling' : 'Group name (optional), e.g. Dough'}
-                    aria-label="Group name"
+                    placeholder={form.groups.length > 1 ? t.form.groupPlaceholderMulti : t.form.groupPlaceholder}
+                    aria-label={t.form.groupName}
                   />
-                  <button type="button" className="icon-btn" disabled={gi === 0} onClick={() => setGroups((gs) => move(gs, gi, -1))} aria-label="Move group up">
+                  <button type="button" className="icon-btn" disabled={gi === 0} onClick={() => setGroups((gs) => move(gs, gi, -1))} aria-label={t.form.moveGroupUp}>
                     <ArrowUp size={18} />
                   </button>
                   <button
@@ -261,17 +264,17 @@ export function RecipeFormPage() {
                     className="icon-btn"
                     disabled={gi === form.groups.length - 1}
                     onClick={() => setGroups((gs) => move(gs, gi, 1))}
-                    aria-label="Move group down"
+                    aria-label={t.form.moveGroupDown}
                   >
                     <ArrowDown size={18} />
                   </button>
                   <button
                     type="button"
                     className="icon-btn hover:text-red-600"
-                    aria-label="Delete group"
+                    aria-label={t.form.deleteGroup}
                     onClick={() => {
                       const hasContent = g.ingredients.some((i) => i.name.trim());
-                      if (!hasContent || confirm(`Delete the group “${g.name || 'Ingredients'}” and its ingredients?`)) {
+                      if (!hasContent || confirm(t.form.confirmDeleteGroup(g.name || t.detail.ingredients))) {
                         setGroups((gs) => (gs.length > 1 ? gs.filter((x) => x.key !== g.key) : [emptyGroup()]));
                       }
                     }}
@@ -305,13 +308,13 @@ export function RecipeFormPage() {
                   className="btn-ghost mt-2 px-2 text-amber-800 dark:text-amber-300"
                   onClick={() => updateGroup(g.key, (x) => ({ ...x, ingredients: [...x.ingredients, emptyIngredient()] }))}
                 >
-                  <Plus size={18} /> Add ingredient
+                  <Plus size={18} /> {t.form.addIngredient}
                 </button>
               </div>
             ))}
           </div>
           <button type="button" className="btn-secondary mt-3 w-full" onClick={() => setGroups((gs) => [...gs, emptyGroup()])}>
-            <Plus size={18} /> Add ingredient group
+            <Plus size={18} /> {t.form.addGroup}
           </button>
         </section>
 
@@ -319,10 +322,10 @@ export function RecipeFormPage() {
 
         <div className="flex gap-2">
           <button type="button" className="btn-secondary flex-1" onClick={() => navigate(-1)}>
-            Cancel
+            {t.common.cancel}
           </button>
           <button type="submit" className="btn-primary flex-1" disabled={save.isPending}>
-            {save.isPending && <Loader2 size={18} className="animate-spin" />} Save recipe
+            {save.isPending && <Loader2 size={18} className="animate-spin" />} {t.form.saveRecipe}
           </button>
         </div>
       </div>
@@ -350,6 +353,7 @@ function IngredientRowEditor({
   onEnter: () => void;
 }) {
   const [showNote, setShowNote] = useState(!!row.note);
+  const { t, lang } = useI18n();
   const noAmount = row.unit === 'to taste';
   return (
     <li className="rounded-xl bg-stone-100/70 p-2 dark:bg-white/5">
@@ -357,21 +361,21 @@ function IngredientRowEditor({
         <input
           className="input w-20 shrink-0 px-2 text-right"
           inputMode="decimal"
-          placeholder={noAmount ? '–' : 'Amt.'}
-          aria-label="Amount"
+          placeholder={noAmount ? '–' : t.form.amountPlaceholder}
+          aria-label={t.form.amount}
           disabled={noAmount}
           value={noAmount ? '' : row.amount}
           onChange={(e) => onChange({ ...row, amount: e.target.value })}
         />
         <select
           className="input w-28 shrink-0 px-2"
-          aria-label="Unit"
+          aria-label={t.form.unit}
           value={row.unit}
           onChange={(e) => onChange({ ...row, unit: e.target.value as Unit })}
         >
           {UNITS.map((u) => (
             <option key={u} value={u}>
-              {u}
+              {unitName(u, lang)}
             </option>
           ))}
         </select>
@@ -380,8 +384,8 @@ function IngredientRowEditor({
             value={row.name}
             onChange={(name) => onChange({ ...row, name })}
             options={catalogNames}
-            placeholder="Ingredient"
-            aria-label="Ingredient"
+            placeholder={t.form.ingredient}
+            aria-label={t.form.ingredient}
             enterKeyHint="next"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -396,24 +400,24 @@ function IngredientRowEditor({
         {showNote ? (
           <input
             className="input flex-1 py-1.5 text-sm"
-            placeholder="Note, e.g. room temperature"
-            aria-label="Note"
+            placeholder={t.form.notePlaceholder}
+            aria-label={t.form.note}
             value={row.note}
             onChange={(e) => onChange({ ...row, note: e.target.value })}
             autoFocus={!row.note}
           />
         ) : (
           <button type="button" className="mr-auto px-1 text-sm text-stone-500 hover:text-amber-700" onClick={() => setShowNote(true)}>
-            + Note
+            {t.form.addNote}
           </button>
         )}
-        <button type="button" className="icon-btn h-8 w-8" disabled={first} onClick={() => onMove(-1)} aria-label="Move up">
+        <button type="button" className="icon-btn h-8 w-8" disabled={first} onClick={() => onMove(-1)} aria-label={t.common.moveUp}>
           <ArrowUp size={16} />
         </button>
-        <button type="button" className="icon-btn h-8 w-8" disabled={last} onClick={() => onMove(1)} aria-label="Move down">
+        <button type="button" className="icon-btn h-8 w-8" disabled={last} onClick={() => onMove(1)} aria-label={t.common.moveDown}>
           <ArrowDown size={16} />
         </button>
-        <button type="button" className="icon-btn h-8 w-8 hover:text-red-600" onClick={onRemove} aria-label="Remove ingredient">
+        <button type="button" className="icon-btn h-8 w-8 hover:text-red-600" onClick={onRemove} aria-label={t.form.removeIngredient}>
           <X size={16} />
         </button>
       </div>
@@ -424,6 +428,7 @@ function IngredientRowEditor({
 function InstructionsEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [preview, setPreview] = useState(false);
   const ref = useRef<HTMLTextAreaElement>(null);
+  const { t } = useI18n();
 
   /** Inserts Markdown at the cursor: wraps the selection or prefixes the current line. */
   const apply = (kind: 'heading' | 'list' | 'bold') => {
@@ -433,7 +438,7 @@ function InstructionsEditor({ value, onChange }: { value: string; onChange: (v: 
     let next: string;
     let cursor: number;
     if (kind === 'bold') {
-      const sel = value.slice(s, e) || 'bold';
+      const sel = value.slice(s, e) || t.form.boldPlaceholder;
       next = `${value.slice(0, s)}**${sel}**${value.slice(e)}`;
       cursor = s + sel.length + 4;
     } else {
@@ -458,16 +463,16 @@ function InstructionsEditor({ value, onChange }: { value: string; onChange: (v: 
   return (
     <section>
       <div className="mb-2 flex items-center gap-1">
-        <h2 className="mr-auto font-display text-xl font-semibold">Instructions</h2>
+        <h2 className="mr-auto font-display text-xl font-semibold">{t.detail.instructions}</h2>
         {!preview && (
           <>
-            <button type="button" className="icon-btn" onClick={() => apply('heading')} aria-label="Heading" title="Heading">
+            <button type="button" className="icon-btn" onClick={() => apply('heading')} aria-label={t.form.heading} title={t.form.heading}>
               <Heading2 size={18} />
             </button>
-            <button type="button" className="icon-btn" onClick={() => apply('list')} aria-label="Numbered step" title="Numbered step">
+            <button type="button" className="icon-btn" onClick={() => apply('list')} aria-label={t.form.step} title={t.form.step}>
               <ListOrdered size={18} />
             </button>
-            <button type="button" className="icon-btn" onClick={() => apply('bold')} aria-label="Bold" title="Bold">
+            <button type="button" className="icon-btn" onClick={() => apply('bold')} aria-label={t.form.bold} title={t.form.bold}>
               <Bold size={18} />
             </button>
           </>
@@ -478,11 +483,11 @@ function InstructionsEditor({ value, onChange }: { value: string; onChange: (v: 
           onClick={() => setPreview((v) => !v)}
           aria-pressed={preview}
         >
-          <Eye size={18} /> Preview
+          <Eye size={18} /> {t.form.preview}
         </button>
       </div>
       {preview ? (
-        <div className="card min-h-48 p-4">{value.trim() ? <Markdown text={value} /> : <p className="text-stone-500">Nothing to preview.</p>}</div>
+        <div className="card min-h-48 p-4">{value.trim() ? <Markdown text={value} /> : <p className="text-stone-500">{t.form.nothingToPreview}</p>}</div>
       ) : (
         <>
           <textarea
@@ -490,10 +495,12 @@ function InstructionsEditor({ value, onChange }: { value: string; onChange: (v: 
             className="input min-h-72 font-mono text-sm leading-relaxed"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={'## Dough\n1. Mix flour and **cold** butter.\n2. Chill for 30 minutes.\n\n#christmas'}
+            placeholder={t.form.instructionsPlaceholder}
           />
           <p className="mt-1 text-xs text-stone-500">
-            Markdown: <code>## Heading</code>, <code>1. Step</code>, <code>**bold**</code>. Write <code>#tag</code> to add a tag.
+            Markdown: <code>{t.form.mdHeading}</code>, <code>{t.form.mdStep}</code>, <code>{t.form.mdBold}</code>. {t.form.mdTagBefore}{' '}
+            <code>#tag</code>{t.form.mdTagAfter.startsWith(',') ? '' : ' '}
+            {t.form.mdTagAfter}
           </p>
         </>
       )}

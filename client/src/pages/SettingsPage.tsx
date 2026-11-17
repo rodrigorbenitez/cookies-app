@@ -2,14 +2,17 @@ import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, Loader2, Monitor, Moon, Search, Sun, Trash2, Upload } from 'lucide-react';
 import { api } from '../lib/api';
-import { CATEGORIES, CATEGORY_LABELS, type Category } from '../lib/types';
+import { CATEGORIES, type Category } from '../lib/types';
+import { useI18n, type Lang } from '../lib/i18n';
 import { applyTheme, getTheme, type Theme } from '../lib/theme';
 import { useToast } from '../components/Toast';
 
 export function SettingsPage() {
+  const { t } = useI18n();
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="font-display text-2xl font-semibold">Settings</h1>
+      <h1 className="font-display text-2xl font-semibold">{t.settings.title}</h1>
+      <LanguageSection />
       <ThemeSection />
       <BackupSection />
       <CatalogSection />
@@ -17,16 +20,47 @@ export function SettingsPage() {
   );
 }
 
-function ThemeSection() {
-  const [theme, setTheme] = useState<Theme>(getTheme());
-  const options: { value: Theme; label: string; icon: typeof Sun }[] = [
-    { value: 'light', label: 'Light', icon: Sun },
-    { value: 'dark', label: 'Dark', icon: Moon },
-    { value: 'system', label: 'System', icon: Monitor },
+function LanguageSection() {
+  const { t, lang, setLang } = useI18n();
+  const options: { value: Lang; label: string }[] = [
+    { value: 'de', label: 'Deutsch' },
+    { value: 'en', label: 'English' },
   ];
   return (
     <section className="card p-4">
-      <h2 className="mb-3 font-display text-lg font-semibold">Appearance</h2>
+      <h2 className="mb-3 font-display text-lg font-semibold">{t.settings.language}</h2>
+      <div className="grid grid-cols-2 gap-2">
+        {options.map(({ value, label }) => (
+          <button
+            key={value}
+            lang={value}
+            className={`btn py-3 ${
+              lang === value
+                ? 'bg-amber-100 text-amber-900 ring-2 ring-amber-600/40 dark:bg-amber-500/15 dark:text-amber-200'
+                : 'btn-secondary'
+            }`}
+            onClick={() => setLang(value)}
+            aria-pressed={lang === value}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ThemeSection() {
+  const [theme, setTheme] = useState<Theme>(getTheme());
+  const { t } = useI18n();
+  const options: { value: Theme; label: string; icon: typeof Sun }[] = [
+    { value: 'light', label: t.settings.light, icon: Sun },
+    { value: 'dark', label: t.settings.dark, icon: Moon },
+    { value: 'system', label: t.settings.system, icon: Monitor },
+  ];
+  return (
+    <section className="card p-4">
+      <h2 className="mb-3 font-display text-lg font-semibold">{t.settings.appearance}</h2>
       <div className="grid grid-cols-3 gap-2">
         {options.map(({ value, label, icon: Icon }) => (
           <button
@@ -55,12 +89,13 @@ function BackupSection() {
   const [keepDuplicates, setKeepDuplicates] = useState(false);
   const qc = useQueryClient();
   const toast = useToast();
+  const { t } = useI18n();
 
   const importer = useMutation({
     mutationFn: (f: File) => api.importBackup(f, keepDuplicates),
     onSuccess: ({ imported, skipped }) => {
       qc.invalidateQueries();
-      toast(`Imported ${imported} recipe(s)${skipped ? `, skipped ${skipped} existing` : ''}`, 'success');
+      toast(t.settings.imported(imported, skipped), 'success');
     },
     onError: (e) => toast((e as Error).message, 'error'),
     onSettled: () => {
@@ -70,16 +105,16 @@ function BackupSection() {
 
   return (
     <section className="card p-4">
-      <h2 className="font-display text-lg font-semibold">Backup</h2>
+      <h2 className="font-display text-lg font-semibold">{t.settings.backup}</h2>
       <p className="mt-1 text-sm text-stone-500">
-        Export all recipes (including images) as one JSON file, or import a file exported before.
+        {t.settings.backupHint}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <a href="/api/backup/export" download className="btn-primary">
-          <Download size={18} /> Export JSON
+          <Download size={18} /> {t.settings.exportJson}
         </a>
         <button className="btn-secondary" disabled={importer.isPending} onClick={() => file.current?.click()}>
-          {importer.isPending ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />} Import JSON
+          {importer.isPending ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />} {t.settings.importJson}
         </button>
         <input
           ref={file}
@@ -96,7 +131,7 @@ function BackupSection() {
           checked={keepDuplicates}
           onChange={(e) => setKeepDuplicates(e.target.checked)}
         />
-        Also import recipes whose title already exists
+        {t.settings.keepDuplicates}
       </label>
     </section>
   );
@@ -107,6 +142,7 @@ function CatalogSection() {
   const [filter, setFilter] = useState('');
   const qc = useQueryClient();
   const toast = useToast();
+  const { t } = useI18n();
   const onError = (e: unknown) => toast((e as Error).message, 'error');
 
   const update = useMutation({
@@ -127,14 +163,13 @@ function CatalogSection() {
 
   return (
     <section className="card p-4">
-      <h2 className="font-display text-lg font-semibold">Ingredients</h2>
+      <h2 className="font-display text-lg font-semibold">{t.settings.ingredients}</h2>
       <p className="mt-1 text-sm text-stone-500">
-        Every ingredient is spelled the same across recipes so the shopping list can combine them. The category decides
-        where it appears on the shopping list.
+        {t.settings.ingredientsHint}
       </p>
       <div className="relative mt-3">
         <Search className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-stone-400" size={18} />
-        <input className="input pl-10" placeholder="Filter ingredients" value={filter} onChange={(e) => setFilter(e.target.value)} />
+        <input className="input pl-10" placeholder={t.settings.filterIngredients} value={filter} onChange={(e) => setFilter(e.target.value)} />
       </div>
       <ul className="mt-3 divide-y divide-stone-900/5 dark:divide-white/5">
         {rows.map((c) => (
@@ -142,7 +177,7 @@ function CatalogSection() {
             <input
               className="input flex-1 border-transparent bg-transparent px-2 py-1 hover:border-stone-300 dark:bg-transparent dark:hover:border-stone-700"
               defaultValue={c.name}
-              aria-label={`Name of ${c.name}`}
+              aria-label={t.settings.nameOf(c.name)}
               onBlur={(e) => {
                 const name = e.target.value.trim();
                 if (name && name !== c.name) update.mutate({ id: c.id, name });
@@ -153,30 +188,30 @@ function CatalogSection() {
             <select
               className="input w-auto py-1 text-sm"
               value={c.category}
-              aria-label={`Category of ${c.name}`}
+              aria-label={t.settings.categoryOf(c.name)}
               onChange={(e) => update.mutate({ id: c.id, category: e.target.value as Category })}
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
-                  {CATEGORY_LABELS[cat]}
+                  {t.categories[cat]}
                 </option>
               ))}
             </select>
-            <span className="w-10 text-right text-xs text-stone-500 tabular-nums" title="Used in recipes">
+            <span className="w-10 text-right text-xs text-stone-500 tabular-nums" title={t.settings.usedIn}>
               {c.usage}×
             </span>
             <button
               className="icon-btn h-8 w-8 hover:text-red-600 disabled:opacity-30"
               disabled={c.usage > 0}
-              title={c.usage > 0 ? 'Still used in recipes' : 'Delete'}
-              aria-label={`Delete ${c.name}`}
+              title={c.usage > 0 ? t.settings.stillUsed : t.detail.delete}
+              aria-label={t.settings.deleteItem(c.name)}
               onClick={() => remove.mutate(c.id)}
             >
               <Trash2 size={16} />
             </button>
           </li>
         ))}
-        {!rows.length && <li className="py-4 text-center text-sm text-stone-500">No ingredients.</li>}
+        {!rows.length && <li className="py-4 text-center text-sm text-stone-500">{t.settings.noIngredients}</li>}
       </ul>
     </section>
   );

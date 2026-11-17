@@ -21,6 +21,7 @@ import { Autocomplete } from '../components/Autocomplete';
 import { useSelection } from '../lib/selection';
 import { useToast } from '../components/Toast';
 import { formatTime } from '../lib/format';
+import { useI18n } from '../lib/i18n';
 
 function useFilters(): [RecipeFilters, (patch: Partial<RecipeFilters>) => void] {
   const [params, setParams] = useSearchParams();
@@ -71,6 +72,7 @@ export function RecipeListPage() {
   const [search, setSearch] = useState(filters.q ?? '');
   const [showFilters, setShowFilters] = useState(false);
   const selection = useSelection();
+  const { t, tError } = useI18n();
 
   // Debounce search input into the URL.
   useEffect(() => {
@@ -100,7 +102,7 @@ export function RecipeListPage() {
           <input
             type="search"
             className="input pl-10"
-            placeholder="Search recipes, ingredients, tags…"
+            placeholder={t.list.searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             enterKeyHint="search"
@@ -110,10 +112,10 @@ export function RecipeListPage() {
           className={`btn-secondary relative px-3 ${showFilters ? 'ring-2 ring-amber-600/40' : ''}`}
           onClick={() => setShowFilters((v) => !v)}
           aria-expanded={showFilters}
-          aria-label="Filters and sorting"
+          aria-label={t.list.filtersAria}
         >
           <SlidersHorizontal size={18} />
-          <span className="hidden sm:inline">Filters</span>
+          <span className="hidden sm:inline">{t.list.filters}</span>
           {filterCount > 0 && (
             <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-700 px-1 text-xs text-white">
               {filterCount}
@@ -124,20 +126,20 @@ export function RecipeListPage() {
           className={`btn-secondary px-3 ${selection.active ? 'bg-amber-700! text-white!' : ''}`}
           onClick={() => selection.setActive(!selection.active)}
           aria-pressed={selection.active}
-          title="Select recipes for a shopping list"
+          title={t.list.selectTitle}
         >
           <ListChecks size={18} />
-          <span className="hidden sm:inline">Select</span>
+          <span className="hidden sm:inline">{t.list.select}</span>
         </button>
         <Link to="/recipes/new" className="btn-primary hidden md:inline-flex">
-          <Plus size={18} /> New recipe
+          <Plus size={18} /> {t.list.newRecipe}
         </Link>
       </div>
 
       {showFilters && (
         <div className="card mt-3 space-y-4 p-4">
           <div>
-            <span className="label">Tags (all must match)</span>
+            <span className="label">{t.list.tagsAll}</span>
             <div className="flex flex-wrap gap-1.5">
               {tags.data?.length ? (
                 tags.data.map(({ tag, count }) => {
@@ -157,30 +159,30 @@ export function RecipeListPage() {
                   );
                 })
               ) : (
-                <span className="text-sm text-stone-500">No tags yet.</span>
+                <span className="text-sm text-stone-500">{t.list.noTags}</span>
               )}
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
-              <span className="label">Minimum rating</span>
+              <span className="label">{t.list.minRating}</span>
               <StarRating value={filters.minRating ?? null} onChange={(v) => setFilters({ minRating: v ?? undefined })} size={22} />
             </div>
             <div>
               <label className="label" htmlFor="filter-ingredient">
-                Contains ingredient
+                {t.list.containsIngredient}
               </label>
               <Autocomplete
                 id="filter-ingredient"
                 value={filters.ingredient ?? ''}
                 onChange={(v) => setFilters({ ingredient: v })}
                 options={catalog.data?.map((c) => c.name) ?? []}
-                placeholder="e.g. butter"
+                placeholder={t.list.ingredientPlaceholder}
               />
             </div>
             <div>
               <label className="label" htmlFor="sort">
-                Sort by
+                {t.list.sortBy}
               </label>
               <select
                 id="sort"
@@ -188,9 +190,9 @@ export function RecipeListPage() {
                 value={filters.sort}
                 onChange={(e) => setFilters({ sort: e.target.value as SortOrder })}
               >
-                <option value="recent">Recently added</option>
-                <option value="name">Name</option>
-                <option value="rating">Rating</option>
+                <option value="recent">{t.list.sortRecent}</option>
+                <option value="name">{t.list.sortName}</option>
+                <option value="rating">{t.list.sortRating}</option>
               </select>
             </div>
           </div>
@@ -211,14 +213,14 @@ export function RecipeListPage() {
           )}
           {filters.ingredient && (
             <button className="chip" onClick={() => setFilters({ ingredient: '' })}>
-              with {filters.ingredient} <X size={14} />
+              {t.list.withIngredient(filters.ingredient)} <X size={14} />
             </button>
           )}
           <button
             className="ml-1 text-sm text-stone-500 underline-offset-2 hover:underline"
             onClick={() => setFilters({ tags: [], minRating: undefined, ingredient: '' })}
           >
-            Clear all
+            {t.list.clearAll}
           </button>
         </div>
       )}
@@ -237,7 +239,9 @@ export function RecipeListPage() {
             ))}
           </Grid>
         ) : recipes.isError ? (
-          <p className="py-16 text-center text-stone-500">Could not load recipes. {(recipes.error as Error).message}</p>
+          <p className="py-16 text-center text-stone-500">
+            {t.list.loadError} {tError((recipes.error as Error).message)}
+          </p>
         ) : recipes.data.length === 0 ? (
           <EmptyState filtered={!unfiltered} />
         ) : (
@@ -252,7 +256,7 @@ export function RecipeListPage() {
       {!selection.active && (
         <Link
           to="/recipes/new"
-          aria-label="New recipe"
+          aria-label={t.list.newRecipe}
           className="fixed right-4 bottom-20 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-amber-700 text-white shadow-lg shadow-amber-900/30 active:scale-95 md:hidden dark:bg-amber-600"
           style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
         >
@@ -269,15 +273,16 @@ function Grid({ children }: { children: React.ReactNode }) {
 }
 
 function EmptyState({ filtered }: { filtered: boolean }) {
+  const { t } = useI18n();
   return (
     <div className="py-16 text-center">
       <p className="font-display text-xl text-stone-700 dark:text-stone-200">
-        {filtered ? 'No recipes match.' : 'Your cookbook is empty.'}
+        {filtered ? t.list.emptyFilteredTitle : t.list.emptyTitle}
       </p>
-      <p className="mt-1 text-stone-500">{filtered ? 'Try fewer filters.' : 'Add your first recipe to get started.'}</p>
+      <p className="mt-1 text-stone-500">{filtered ? t.list.emptyFilteredHint : t.list.emptyHint}</p>
       {!filtered && (
         <Link to="/recipes/new" className="btn-primary mt-4">
-          <Plus size={18} /> New recipe
+          <Plus size={18} /> {t.list.newRecipe}
         </Link>
       )}
     </div>
@@ -288,7 +293,8 @@ function RecipeCard({ recipe, onTag }: { recipe: RecipeSummary; onTag: (tag: str
   const selection = useSelection();
   const selected = selection.isSelected(recipe.id);
   const navigate = useNavigate();
-  const time = formatTime(recipe.prepTime);
+  const { t, lang } = useI18n();
+  const time = formatTime(recipe.prepTime, lang);
 
   const open = () => {
     if (selection.active) selection.toggle({ id: recipe.id, title: recipe.title, servings: recipe.servings });
@@ -311,7 +317,7 @@ function RecipeCard({ recipe, onTag }: { recipe: RecipeSummary; onTag: (tag: str
             }`}
             role="checkbox"
             aria-checked={selected}
-            aria-label={`Select ${recipe.title}`}
+            aria-label={t.list.selectRecipe(recipe.title)}
           >
             <Check size={16} strokeWidth={3} />
           </span>
@@ -360,6 +366,7 @@ function SelectionBar() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const toast = useToast();
+  const { t } = useI18n();
   const count = selection.selected.length;
 
   const generate = useMutation({
@@ -373,7 +380,7 @@ function SelectionBar() {
     onError: (e) => toast((e as Error).message, 'error'),
   });
 
-  const summary = useMemo(() => `${count} recipe${count === 1 ? '' : 's'} selected`, [count]);
+  const summary = useMemo(() => t.selection.count(count), [count, t]);
 
   return (
     <div className="pb-safe fixed inset-x-0 bottom-0 z-50 border-t border-stone-900/10 bg-cream-50 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-cocoa-900">
@@ -383,15 +390,15 @@ function SelectionBar() {
             {selection.selected.map((s) => (
               <li key={s.id} className="flex items-center gap-2">
                 <span className="flex-1 truncate font-medium">{s.title}</span>
-                <span className="text-sm text-stone-500">Servings</span>
-                <button className="icon-btn h-8 w-8" onClick={() => selection.setServings(s.id, s.servings - 1)} aria-label="Fewer servings">
+                <span className="text-sm text-stone-500">{t.servings.label}</span>
+                <button className="icon-btn h-8 w-8" onClick={() => selection.setServings(s.id, s.servings - 1)} aria-label={t.servings.fewer}>
                   <Minus size={16} />
                 </button>
                 <span className="w-8 text-center font-semibold tabular-nums">{s.servings}</span>
-                <button className="icon-btn h-8 w-8" onClick={() => selection.setServings(s.id, s.servings + 1)} aria-label="More servings">
+                <button className="icon-btn h-8 w-8" onClick={() => selection.setServings(s.id, s.servings + 1)} aria-label={t.servings.more}>
                   <Plus size={16} />
                 </button>
-                <button className="icon-btn h-8 w-8" onClick={() => selection.toggle(s)} aria-label={`Remove ${s.title}`}>
+                <button className="icon-btn h-8 w-8" onClick={() => selection.toggle(s)} aria-label={t.common.remove(s.title)}>
                   <X size={16} />
                 </button>
               </li>
@@ -401,14 +408,14 @@ function SelectionBar() {
         <div className="flex items-center gap-2">
           <button className="btn-ghost flex-1 justify-start px-2" onClick={() => setExpanded((v) => !v)} disabled={!count}>
             <ChevronUp size={18} className={`transition ${expanded ? 'rotate-180' : ''}`} />
-            {count ? summary : 'Tap recipes to select them'}
+            {count ? summary : t.selection.hint}
           </button>
           <button className="btn-ghost" onClick={() => selection.setActive(false)}>
-            Cancel
+            {t.common.cancel}
           </button>
           <button className="btn-primary" disabled={!count || generate.isPending} onClick={() => generate.mutate()}>
-            <ShoppingBasket size={18} /> <span className="hidden sm:inline">Shopping list</span>
-            <span className="sm:hidden">List</span>
+            <ShoppingBasket size={18} /> <span className="hidden sm:inline">{t.selection.shoppingList}</span>
+            <span className="sm:hidden">{t.selection.list}</span>
           </button>
         </div>
       </div>

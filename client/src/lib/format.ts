@@ -1,3 +1,4 @@
+import type { Lang } from './i18n';
 import type { Unit } from './types';
 
 const FRACTIONS: [number, string][] = [
@@ -9,8 +10,8 @@ const FRACTIONS: [number, string][] = [
   [0.75, '¾'],
 ];
 
-/** 0.5 -> "½", 1.25 -> "1¼", 333.33 -> "333", 2.4 -> "2.4" */
-export function formatAmount(n: number | null | undefined): string {
+/** 0.5 -> "½", 1.25 -> "1¼", 333.33 -> "333", 2.4 -> "2.4" (en) / "2,4" (de) */
+export function formatAmount(n: number | null | undefined, lang: Lang = 'de'): string {
   if (n == null) return '';
   if (n >= 100) return String(Math.round(n));
   const whole = Math.floor(n);
@@ -22,7 +23,9 @@ export function formatAmount(n: number | null | undefined): string {
   }
   if (frac < 0.01) return String(whole);
   if (frac > 0.99) return String(whole + 1);
-  return String(Math.round(n * (n >= 10 ? 10 : 100)) / (n >= 10 ? 10 : 100));
+  const digits = n >= 10 ? 10 : 100;
+  const s = String(Math.round(n * digits) / digits);
+  return lang === 'de' ? s.replace('.', ',') : s;
 }
 
 type Family = 'mass' | 'volume' | 'spoon';
@@ -56,26 +59,60 @@ export function scaleIngredient(amount: number | null, unit: Unit, factor: numbe
   }
 }
 
-export function formatQuantity(amount: number | null, unit: string | null): string {
-  if (unit === 'to taste') return 'to taste';
-  const a = formatAmount(amount);
-  if (!unit) return a;
-  if (unit === 'piece') return a;
-  if (!a) return unit === 'pinch' ? 'a pinch' : '';
-  const plural =
-    amount != null && amount > 1 && ['pinch', 'packet', 'bunch'].includes(unit)
-      ? unit === 'pinch'
-        ? 'pinches'
-        : unit === 'bunch'
-          ? 'bunches'
-          : 'packets'
-      : unit;
-  return `${a} ${plural}`;
+/** Unit names as shown in the unit picker. */
+const UNIT_NAMES: Record<Lang, Record<Unit, string>> = {
+  en: {
+    g: 'g', kg: 'kg', ml: 'ml', l: 'l', tsp: 'tsp', tbsp: 'tbsp',
+    piece: 'piece', pinch: 'pinch', packet: 'packet', bunch: 'bunch', 'to taste': 'to taste',
+  },
+  de: {
+    g: 'g', kg: 'kg', ml: 'ml', l: 'l', tsp: 'TL', tbsp: 'EL',
+    piece: 'Stück', pinch: 'Prise', packet: 'Päckchen', bunch: 'Bund', 'to taste': 'nach Geschmack',
+  },
+};
+
+const UNIT_PLURALS: Record<Lang, Partial<Record<Unit, string>>> = {
+  en: { pinch: 'pinches', packet: 'packets', bunch: 'bunches' },
+  de: { pinch: 'Prisen' },
+};
+
+export function unitName(unit: Unit, lang: Lang) {
+  return UNIT_NAMES[lang][unit] ?? unit;
 }
 
-export function formatTime(minutes: number | null | undefined) {
+function isUnit(u: string): u is Unit {
+  return u in UNIT_NAMES.en;
+}
+
+/** "250 g", "2 EL", "eine Prise", "nach Geschmack". Pieces show only the number. */
+export function formatQuantity(amount: number | null, unit: string | null, lang: Lang = 'de'): string {
+  if (unit === 'to taste') return UNIT_NAMES[lang]['to taste'];
+  const a = formatAmount(amount, lang);
+  if (!unit || unit === 'piece') return a;
+  if (!isUnit(unit)) return a ? `${a} ${unit}` : unit;
+  if (!a) return unit === 'pinch' ? (lang === 'de' ? 'eine Prise' : 'a pinch') : '';
+  const name = amount != null && amount > 1 ? (UNIT_PLURALS[lang][unit] ?? unitName(unit, lang)) : unitName(unit, lang);
+  return `${a} ${name}`;
+}
+
+export function formatTime(minutes: number | null | undefined, lang: Lang = 'de') {
   if (!minutes) return null;
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return h ? `${h} h${m ? ` ${m} min` : ''}` : `${m} min`;
+  const [hu, mu] = lang === 'de' ? ['Std.', 'Min.'] : ['h', 'min'];
+  return h ? `${h} ${hu}${m ? ` ${m} ${mu}` : ''}` : `${m} ${mu}`;
+}
+
+/** Unit words a user may type in the shopping list ("2 EL Zucker", "1 Pck. Vanillezucker"). */
+const UNIT_ALIASES: Record<string, Unit> = {
+  g: 'g', gr: 'g', gramm: 'g', kg: 'kg', ml: 'ml', l: 'l', liter: 'l',
+  tsp: 'tsp', tl: 'tsp', tbsp: 'tbsp', el: 'tbsp',
+  piece: 'piece', pieces: 'piece', stk: 'piece', stück: 'piece',
+  pinch: 'pinch', prise: 'pinch', prisen: 'pinch',
+  packet: 'packet', packets: 'packet', pck: 'packet', päckchen: 'packet', pkg: 'packet',
+  bunch: 'bunch', bund: 'bunch',
+};
+
+export function parseUnitWord(word: string): Unit | null {
+  return UNIT_ALIASES[word.toLowerCase().replace(/\.$/, '')] ?? null;
 }

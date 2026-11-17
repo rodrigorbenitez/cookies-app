@@ -6,6 +6,7 @@ import { registerSW } from 'virtual:pwa-register';
 import { App } from './App';
 import { ToastProvider } from './components/Toast';
 import { SelectionProvider } from './lib/selection';
+import { I18nProvider } from './lib/i18n';
 import { watchSystemTheme } from './lib/theme';
 import './index.css';
 
@@ -28,11 +29,13 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ToastProvider>
-          <SelectionProvider>
-            <App />
-          </SelectionProvider>
-        </ToastProvider>
+        <I18nProvider>
+          <ToastProvider>
+            <SelectionProvider>
+              <App />
+            </SelectionProvider>
+          </ToastProvider>
+        </I18nProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>,

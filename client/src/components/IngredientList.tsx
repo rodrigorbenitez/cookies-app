@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react';
 import type { IngredientGroup } from '../lib/types';
 import { formatQuantity, scaleIngredient } from '../lib/format';
+import { useI18n } from '../lib/i18n';
 
 interface Props {
   groups: IngredientGroup[];
@@ -12,6 +13,7 @@ interface Props {
 
 /** Ingredients by group, scaled by `factor`. Optionally checkable (cooking mode). */
 export function IngredientList({ groups, factor, checked, onToggle, large }: Props) {
+  const { lang } = useI18n();
   const visible = groups.filter((g) => g.ingredients.length || g.name);
   return (
     <div className={large ? 'space-y-6' : 'space-y-5'}>
@@ -27,7 +29,7 @@ export function IngredientList({ groups, factor, checked, onToggle, large }: Pro
           <ul className={large ? 'space-y-1' : 'divide-y divide-stone-900/5 dark:divide-white/5'}>
             {g.ingredients.map((i) => {
               const s = scaleIngredient(i.amount, i.unit, factor);
-              const qty = formatQuantity(s.amount, s.unit);
+              const qty = formatQuantity(s.amount, s.unit, lang);
               const done = checked?.has(i.id);
               const content = (
                 <>

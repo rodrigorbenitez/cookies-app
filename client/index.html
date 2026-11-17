@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="description" content="My personal cookbook and baking recipes" />
+    <meta name="description" content="Mein persönliches Koch- und Backbuch" />
     <meta name="theme-color" content="#b45309" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Cookbook" />
+    <meta name="apple-mobile-web-app-title" content="Kochbuch" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>Cookbook</title>
+    <title>Kochbuch</title>
     <script>
       // Apply the saved theme before first paint to avoid a flash.
       (function () {
@@ -18,6 +18,8 @@
           var t = localStorage.getItem('theme') || 'system';
           var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
           document.documentElement.classList.toggle('dark', dark);
+          var lang = localStorage.getItem('lang');
+          if (lang === 'en' || lang === 'de') document.documentElement.lang = lang;
         } catch (e) {}
       })();
     </script>

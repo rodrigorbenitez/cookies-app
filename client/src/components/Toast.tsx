@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
+import { useI18n } from '../lib/i18n';
 
 type Kind = 'info' | 'error' | 'success';
 interface ToastMsg {
@@ -11,11 +12,14 @@ const Ctx = createContext<(text: string, kind?: Kind) => void>(() => {});
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastMsg[]>([]);
-  const show = useCallback((text: string, kind: Kind = 'info') => {
+  const { tError } = useI18n();
+  const show = useCallback((raw: string, kind: Kind = 'info') => {
     const id = Date.now() + Math.random();
+    // Error messages may come from the API in English: translate the known ones.
+    const text = kind === 'error' ? tError(raw) : raw;
     setToasts((t) => [...t, { id, text, kind }]);
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3500);
-  }, []);
+  }, [tError]);
   return (
     <Ctx.Provider value={show}>
       {children}

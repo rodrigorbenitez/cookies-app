@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Camera, ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { api, imageUrl } from '../lib/api';
 import { useToast } from './Toast';
+import { useI18n } from '../lib/i18n';
 
 interface Props {
   value: string | null;
@@ -14,6 +15,7 @@ export function ImagePicker({ value, onChange }: Props) {
   const gallery = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const toast = useToast();
+  const { t } = useI18n();
 
   const upload = async (file: File | undefined) => {
     if (!file) return;
@@ -49,13 +51,13 @@ export function ImagePicker({ value, onChange }: Props) {
       </div>
       <div className="mt-2 flex flex-wrap gap-2">
         <button type="button" className="btn-secondary flex-1" disabled={busy} onClick={() => camera.current?.click()}>
-          <Camera size={18} /> Camera
+          <Camera size={18} /> {t.form.camera}
         </button>
         <button type="button" className="btn-secondary flex-1" disabled={busy} onClick={() => gallery.current?.click()}>
-          <ImagePlus size={18} /> Gallery
+          <ImagePlus size={18} /> {t.form.gallery}
         </button>
         {value && (
-          <button type="button" className="btn-ghost" disabled={busy} onClick={() => onChange(null)} aria-label="Remove image">
+          <button type="button" className="btn-ghost" disabled={busy} onClick={() => onChange(null)} aria-label={t.form.removeImage}>
             <Trash2 size={18} />
           </button>
         )}

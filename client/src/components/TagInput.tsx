@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import { Autocomplete } from './Autocomplete';
 import { normalizeTag } from '../lib/tags';
+import { useI18n } from '../lib/i18n';
 
 interface Props {
   value: string[];
@@ -12,6 +13,7 @@ interface Props {
 /** Type tags with # (e.g. "#christmas #cookies"); space, comma or Enter adds a tag. */
 export function TagInput({ value, onChange, suggestions }: Props) {
   const [text, setText] = useState('');
+  const { t } = useI18n();
 
   const add = (raw: string) => {
     const parts = raw.split(/[\s,]+/).map(normalizeTag).filter((t) => t && /\p{L}/u.test(t));
@@ -25,14 +27,14 @@ export function TagInput({ value, onChange, suggestions }: Props) {
     <div>
       {value.length > 0 && (
         <div className="mb-2 flex flex-wrap gap-1.5">
-          {value.map((t) => (
-            <span key={t} className="chip">
-              #{t}
+          {value.map((tag) => (
+            <span key={tag} className="chip">
+              #{tag}
               <button
                 type="button"
-                aria-label={`Remove tag ${t}`}
+                aria-label={t.form.removeTag(tag)}
                 className="-mr-1 rounded-full p-0.5 hover:bg-amber-200 dark:hover:bg-amber-500/30"
-                onClick={() => onChange(value.filter((x) => x !== t))}
+                onClick={() => onChange(value.filter((x) => x !== tag))}
               >
                 <X size={14} />
               </button>
@@ -45,7 +47,7 @@ export function TagInput({ value, onChange, suggestions }: Props) {
         onChange={(v) => (/[\s,]$/.test(v) ? add(v) : setText(v))}
         onSelect={(v) => add(v)}
         options={available}
-        placeholder="#christmas #cookies"
+        placeholder={t.form.tagPlaceholder}
         enterKeyHint="done"
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
