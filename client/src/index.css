@@ -1,0 +1,92 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, ui-serif, serif;
+
+  --color-cream-50: #fffdfa;
+  --color-cream-100: #fbf7f2;
+  --color-cream-200: #f3ebe0;
+  --color-cream-300: #e8dccb;
+
+  --color-cocoa-700: #4a3428;
+  --color-cocoa-800: #2f221b;
+  --color-cocoa-900: #1f1713;
+  --color-cocoa-950: #15100d;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-cream-100 text-stone-800 antialiased dark:bg-cocoa-950 dark:text-stone-100;
+  }
+  input,
+  textarea,
+  select {
+    @apply text-base;
+  }
+}
+
+@utility card {
+  @apply rounded-2xl bg-cream-50 shadow-sm ring-1 ring-stone-900/5 dark:bg-cocoa-900 dark:ring-white/10;
+}
+@utility input {
+  @apply w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-stone-900 placeholder:text-stone-400
+    focus:border-amber-600 focus:ring-2 focus:ring-amber-600/30 focus:outline-none
+    dark:border-stone-700 dark:bg-cocoa-800 dark:text-stone-100 dark:placeholder:text-stone-500;
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 font-medium transition
+    select-none disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98];
+}
+@utility btn-primary {
+  @apply btn bg-amber-700 text-white shadow-sm hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500;
+}
+@utility btn-secondary {
+  @apply btn bg-stone-200/70 text-stone-800 hover:bg-stone-300/70 dark:bg-white/10 dark:text-stone-100 dark:hover:bg-white/15;
+}
+@utility btn-ghost {
+  @apply btn text-stone-600 hover:bg-stone-200/60 dark:text-stone-300 dark:hover:bg-white/10;
+}
+@utility btn-danger {
+  @apply btn bg-red-600 text-white hover:bg-red-700;
+}
+@utility icon-btn {
+  @apply inline-flex h-10 w-10 items-center justify-center rounded-full text-stone-600 transition
+    hover:bg-stone-200/70 active:scale-95 dark:text-stone-300 dark:hover:bg-white/10;
+}
+@utility chip {
+  @apply inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-sm font-medium text-amber-900
+    dark:bg-amber-500/15 dark:text-amber-200;
+}
+@utility label {
+  @apply mb-1 block text-sm font-medium text-stone-600 dark:text-stone-300;
+}
+
+/* Markdown instructions */
+.prose-recipe h1,
+.prose-recipe h2,
+.prose-recipe h3 {
+  @apply mt-6 mb-2 font-display font-semibold text-stone-900 first:mt-0 dark:text-stone-50;
+}
+.prose-recipe h1 { @apply text-2xl; }
+.prose-recipe h2 { @apply text-xl; }
+.prose-recipe h3 { @apply text-lg; }
+.prose-recipe p { @apply my-3 leading-relaxed; }
+.prose-recipe ol { @apply my-3 list-decimal space-y-2 pl-6 marker:font-semibold marker:text-amber-700 dark:marker:text-amber-400; }
+.prose-recipe ul { @apply my-3 list-disc space-y-1 pl-6 marker:text-amber-700; }
+.prose-recipe li { @apply pl-1 leading-relaxed; }
+.prose-recipe strong { @apply font-semibold text-stone-900 dark:text-white; }
+.prose-recipe a { @apply font-medium text-amber-700 underline-offset-2 hover:underline dark:text-amber-400; }
+.prose-recipe blockquote { @apply border-l-4 border-amber-300 pl-4 italic text-stone-600 dark:text-stone-300; }
+.prose-recipe code { @apply rounded bg-stone-200 px-1 text-sm dark:bg-white/10; }
+
+.cooking .prose-recipe { @apply text-xl md:text-2xl; }
+.cooking .prose-recipe li { @apply leading-loose; }
+
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.pt-safe { padding-top: env(safe-area-inset-top); }
