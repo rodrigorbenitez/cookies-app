@@ -14,6 +14,7 @@ import { uploadRoutes } from './routes/uploads.js';
 import { tagRoutes } from './routes/tags.js';
 import { catalogRoutes } from './routes/catalog.js';
 import { shoppingRoutes } from './routes/shopping.js';
+import { backupRoutes } from './routes/backup.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const clientDist = path.resolve(here, '../../client/dist');
@@ -44,6 +45,7 @@ export function createApp() {
   api.route('/tags', tagRoutes);
   api.route('/catalog', catalogRoutes);
   api.route('/shopping-list', shoppingRoutes);
+  api.route('/backup', backupRoutes);
   app.route('/api', api);
   app.all('/api/*', (c) => c.json({ error: 'Not found' }, 404));
 
