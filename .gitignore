@@ -1,0 +1,37 @@
+# Environment files (only .env.example is committed)
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+dev-dist/
+
+# Uploaded images and local data (never commit)
+uploads/
+data/
+
+# Exports, dumps and backups (never commit)
+*.dump
+*.sql.gz
+*.backup
+*.bak
+backup/
+backups/
+exports/
+cookbook-export*.json
+cookbook-backup*.json
+
+# Logs and OS noise
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
