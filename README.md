@@ -12,7 +12,8 @@ A personal cookbook and baking app. It's a Progressive Web App (PWA) that works 
 - A shopping list built from several recipes, with servings scaling, combined amounts, unit normalization (g/kg, ml/l, tsp/tbsp), grouping by category, check-off, manual items and sharing
 - Cooking mode: large text, ingredients you can tick off, and the screen stays on (Wake Lock API)
 - JSON export and import of all recipes, with images embedded as Base64
-- Dark mode
+- German by default, with a language switch (DE/EN) in the header and in Settings. The choice is remembered on each device
+- A Christmas theme (berry red, pine green and gold, fairy lights and falling snow) with a dark mode. Snowfall can be turned off in Settings and is hidden automatically when the device prefers reduced motion
 
 **Tech stack:** React + TypeScript + Vite + Tailwind CSS (client), Node.js + TypeScript + Hono (REST API under `/api`), PostgreSQL + Drizzle ORM (migrations), and sharp (images resized to max 1200 px and saved as WebP). Everything runs as one service: the server also serves the built frontend.
 
@@ -41,7 +42,7 @@ Requirements: Node.js 20.19+ (22 recommended), Docker, and [gitleaks](https://gi
 cp .env.example .env          # placeholder values for the local database
 docker compose up -d          # starts Postgres with the credentials from .env
 npm install
-npm run seed                  # optional: adds 5 sample recipes
+npm run seed                  # optional: adds 5 German sample recipes
 npm run dev                   # API on :3000, app on http://localhost:5173
 ```
 
