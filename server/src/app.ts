@@ -59,7 +59,16 @@ export function createApp() {
         onFound: (_path, c) => c.header('Cache-Control', 'public, max-age=31536000, immutable'),
       }),
     );
-    app.use('*', serveStatic({ root: clientDist }));
+    app.use(
+      '*',
+      serveStatic({
+        root: clientDist,
+        // The HTML shell and service worker must always be revalidated so updates reach the phone.
+        onFound: (filePath, c) => {
+          if (/\.(html|webmanifest)$|sw\.js$|registerSW\.js$/.test(filePath)) c.header('Cache-Control', 'no-cache');
+        },
+      }),
+    );
     // SPA fallback for client-side routes.
     const indexHtml = fs.readFileSync(path.join(clientDist, 'index.html'), 'utf8');
     app.get('*', (c) => {

@@ -16,7 +16,6 @@ import { guessCategory } from '../lib/categories.js';
 export const generateInput = z.object({
   recipes: z
     .array(z.object({ id: z.number().int().positive(), servings: z.number().int().min(1).max(500) }))
-    .min(1)
     .max(100),
 });
 
@@ -60,24 +59,27 @@ export async function generateShoppingList(input: z.infer<typeof generateInput>)
   const wanted = new Map(input.recipes.map((r) => [r.id, r.servings]));
 
   await db.transaction(async (tx) => {
-    const recipeRows = await tx
-      .select({ id: recipes.id, title: recipes.title, servings: recipes.servings })
-      .from(recipes)
-      .where(inArray(recipes.id, ids));
-    const ingredientRows = await tx
-      .select({
-        recipeId: ingredientGroups.recipeId,
-        catalogId: ingredientCatalog.id,
-        name: ingredientCatalog.name,
-        category: ingredientCatalog.category,
-        amount: ingredients.amount,
-        unit: ingredients.unit,
-      })
-      .from(ingredients)
-      .innerJoin(ingredientGroups, eq(ingredientGroups.id, ingredients.groupId))
-      .innerJoin(ingredientCatalog, eq(ingredientCatalog.id, ingredients.catalogId))
-      .where(inArray(ingredientGroups.recipeId, ids));
-
+    const recipeRows = !ids.length
+      ? []
+      : await tx
+          .select({ id: recipes.id, title: recipes.title, servings: recipes.servings })
+          .from(recipes)
+          .where(inArray(recipes.id, ids));
+    const ingredientRows = !ids.length
+      ? []
+      : await tx
+          .select({
+            recipeId: ingredientGroups.recipeId,
+            catalogId: ingredientCatalog.id,
+            name: ingredientCatalog.name,
+            category: ingredientCatalog.category,
+            amount: ingredients.amount,
+            unit: ingredients.unit,
+          })
+          .from(ingredients)
+          .innerJoin(ingredientGroups, eq(ingredientGroups.id, ingredients.groupId))
+          .innerJoin(ingredientCatalog, eq(ingredientCatalog.id, ingredients.catalogId))
+          .where(inArray(ingredientGroups.recipeId, ids));
     const forList: RecipeForList[] = recipeRows.map((r) => ({
       title: r.title,
       servings: r.servings,
