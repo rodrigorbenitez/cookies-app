@@ -13,6 +13,7 @@ import { recipeRoutes } from './routes/recipes.js';
 import { uploadRoutes } from './routes/uploads.js';
 import { tagRoutes } from './routes/tags.js';
 import { catalogRoutes } from './routes/catalog.js';
+import { shoppingRoutes } from './routes/shopping.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const clientDist = path.resolve(here, '../../client/dist');
@@ -42,6 +43,7 @@ export function createApp() {
   api.route('/uploads', uploadRoutes);
   api.route('/tags', tagRoutes);
   api.route('/catalog', catalogRoutes);
+  api.route('/shopping-list', shoppingRoutes);
   app.route('/api', api);
   app.all('/api/*', (c) => c.json({ error: 'Not found' }, 404));
 
