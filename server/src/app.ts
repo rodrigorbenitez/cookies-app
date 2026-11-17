@@ -9,6 +9,10 @@ import { sql } from 'drizzle-orm';
 import { db } from './db/client.js';
 import { handleError } from './lib/errors.js';
 import { imageRoutes } from './routes/images.js';
+import { recipeRoutes } from './routes/recipes.js';
+import { uploadRoutes } from './routes/uploads.js';
+import { tagRoutes } from './routes/tags.js';
+import { catalogRoutes } from './routes/catalog.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const clientDist = path.resolve(here, '../../client/dist');
@@ -34,6 +38,10 @@ export function createApp() {
   });
 
   api.route('/images', imageRoutes);
+  api.route('/recipes', recipeRoutes);
+  api.route('/uploads', uploadRoutes);
+  api.route('/tags', tagRoutes);
+  api.route('/catalog', catalogRoutes);
   app.route('/api', api);
   app.all('/api/*', (c) => c.json({ error: 'Not found' }, 404));
 
