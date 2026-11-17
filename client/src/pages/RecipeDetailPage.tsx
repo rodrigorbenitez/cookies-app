@@ -105,7 +105,7 @@ export function RecipeDetailPage() {
         {r.tags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {r.tags.map((t) => (
-              <Link key={t} to={`/?tags=${encodeURIComponent(t)}`} className="chip hover:bg-amber-200 dark:hover:bg-amber-500/25">
+              <Link key={t} to={`/?tags=${encodeURIComponent(t)}`} className="chip hover:bg-pine-200 dark:hover:bg-pine-500/25">
                 #{t}
               </Link>
             ))}

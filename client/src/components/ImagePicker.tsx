@@ -35,11 +35,11 @@ export function ImagePicker({ value, onChange }: Props) {
   const src = imageUrl(value);
   return (
     <div>
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-amber-100 to-orange-200 dark:from-amber-900/40 dark:to-orange-900/30">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-brand-50 to-pine-100 dark:from-brand-900/40 dark:to-pine-900/40">
         {src ? (
           <img src={src} alt="" className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full items-center justify-center text-amber-800/60 dark:text-amber-200/50">
+          <div className="flex h-full items-center justify-center text-brand-800/60 dark:text-brand-200/50">
             <ImagePlus size={48} strokeWidth={1.25} />
           </div>
         )}

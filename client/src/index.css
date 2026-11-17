@@ -6,15 +6,45 @@
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, ui-serif, serif;
 
+  /* Christmas palette: berry red, pine green, gold, snowy cream and a deep forest night for dark mode. */
   --color-cream-50: #fffdfa;
-  --color-cream-100: #fbf7f2;
+  --color-cream-100: #fbf7f1;
   --color-cream-200: #f3ebe0;
   --color-cream-300: #e8dccb;
 
-  --color-cocoa-700: #4a3428;
-  --color-cocoa-800: #2f221b;
-  --color-cocoa-900: #1f1713;
-  --color-cocoa-950: #15100d;
+  --color-brand-50: #fef2f2;
+  --color-brand-100: #fde3e3;
+  --color-brand-200: #fbcaca;
+  --color-brand-300: #f6a3a3;
+  --color-brand-400: #ec6d6d;
+  --color-brand-500: #dc3e3e;
+  --color-brand-600: #c42727;
+  --color-brand-700: #a41d1f;
+  --color-brand-800: #87191c;
+  --color-brand-900: #70191c;
+  --color-brand-950: #3d0809;
+
+  --color-pine-50: #effaf3;
+  --color-pine-100: #d8f3e1;
+  --color-pine-200: #b4e5c6;
+  --color-pine-300: #82d0a3;
+  --color-pine-400: #4fb37c;
+  --color-pine-500: #2d9660;
+  --color-pine-600: #1f794c;
+  --color-pine-700: #1a613f;
+  --color-pine-800: #174d34;
+  --color-pine-900: #14402c;
+  --color-pine-950: #0a2418;
+
+  --color-gold-300: #f7d774;
+  --color-gold-400: #f1c040;
+  --color-gold-500: #dca521;
+  --color-gold-600: #b9861a;
+
+  --color-night-700: #24402f;
+  --color-night-800: #1a2e24;
+  --color-night-900: #13221b;
+  --color-night-950: #0c1712;
 }
 
 @layer base {
@@ -22,7 +52,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-cream-100 text-stone-800 antialiased dark:bg-cocoa-950 dark:text-stone-100;
+    @apply bg-cream-100 text-stone-800 antialiased dark:bg-night-950 dark:text-stone-100;
   }
   input,
   textarea,
@@ -32,19 +62,19 @@
 }
 
 @utility card {
-  @apply rounded-2xl bg-cream-50 shadow-sm ring-1 ring-stone-900/5 dark:bg-cocoa-900 dark:ring-white/10;
+  @apply rounded-2xl bg-cream-50 shadow-sm ring-1 ring-stone-900/5 dark:bg-night-900 dark:ring-white/10;
 }
 @utility input {
   @apply w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-stone-900 placeholder:text-stone-400
-    focus:border-amber-600 focus:ring-2 focus:ring-amber-600/30 focus:outline-none
-    dark:border-stone-700 dark:bg-cocoa-800 dark:text-stone-100 dark:placeholder:text-stone-500;
+    focus:border-brand-600 focus:ring-2 focus:ring-brand-600/30 focus:outline-none
+    dark:border-stone-700 dark:bg-night-800 dark:text-stone-100 dark:placeholder:text-stone-500;
 }
 @utility btn {
   @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 font-medium transition
     select-none disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98];
 }
 @utility btn-primary {
-  @apply btn bg-amber-700 text-white shadow-sm hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500;
+  @apply btn bg-brand-700 text-white shadow-sm hover:bg-brand-800 dark:bg-brand-600 dark:hover:bg-brand-500;
 }
 @utility btn-secondary {
   @apply btn bg-stone-200/70 text-stone-800 hover:bg-stone-300/70 dark:bg-white/10 dark:text-stone-100 dark:hover:bg-white/15;
@@ -60,8 +90,8 @@
     hover:bg-stone-200/70 active:scale-95 dark:text-stone-300 dark:hover:bg-white/10;
 }
 @utility chip {
-  @apply inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-sm font-medium text-amber-900
-    dark:bg-amber-500/15 dark:text-amber-200;
+  @apply inline-flex items-center gap-1 rounded-full bg-pine-100 px-2.5 py-0.5 text-sm font-medium text-pine-800
+    dark:bg-pine-500/15 dark:text-pine-200;
 }
 @utility label {
   @apply mb-1 block text-sm font-medium text-stone-600 dark:text-stone-300;
@@ -77,12 +107,12 @@
 .prose-recipe h2 { @apply text-xl; }
 .prose-recipe h3 { @apply text-lg; }
 .prose-recipe p { @apply my-3 leading-relaxed; }
-.prose-recipe ol { @apply my-3 list-decimal space-y-2 pl-6 marker:font-semibold marker:text-amber-700 dark:marker:text-amber-400; }
-.prose-recipe ul { @apply my-3 list-disc space-y-1 pl-6 marker:text-amber-700; }
+.prose-recipe ol { @apply my-3 list-decimal space-y-2 pl-6 marker:font-semibold marker:text-brand-700 dark:marker:text-brand-400; }
+.prose-recipe ul { @apply my-3 list-disc space-y-1 pl-6 marker:text-brand-700; }
 .prose-recipe li { @apply pl-1 leading-relaxed; }
 .prose-recipe strong { @apply font-semibold text-stone-900 dark:text-white; }
-.prose-recipe a { @apply font-medium text-amber-700 underline-offset-2 hover:underline dark:text-amber-400; }
-.prose-recipe blockquote { @apply border-l-4 border-amber-300 pl-4 italic text-stone-600 dark:text-stone-300; }
+.prose-recipe a { @apply font-medium text-brand-700 underline-offset-2 hover:underline dark:text-brand-400; }
+.prose-recipe blockquote { @apply border-l-4 border-gold-400 pl-4 italic text-stone-600 dark:text-stone-300; }
 .prose-recipe code { @apply rounded bg-stone-200 px-1 text-sm dark:bg-white/10; }
 
 .cooking .prose-recipe { @apply text-xl md:text-2xl; }
@@ -90,3 +120,63 @@
 
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 .pt-safe { padding-top: env(safe-area-inset-top); }
+
+/* ---------- Christmas decorations ---------- */
+
+/* Little snow dots on placeholder images */
+.xmas-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgb(255 255 255 / 0.35) 1.5px, transparent 2px),
+    radial-gradient(circle, rgb(255 255 255 / 0.22) 1px, transparent 1.5px);
+  background-size: 28px 28px, 17px 17px;
+  background-position: 0 0, 9px 11px;
+}
+
+/* String of fairy lights hanging under the header */
+.xmas-lights {
+  height: 22px;
+  background-image: url('/lights.svg');
+  background-repeat: repeat-x;
+  background-size: 160px 22px;
+}
+.xmas-lights-glow {
+  animation: twinkle 2.4s ease-in-out infinite alternate;
+}
+@keyframes twinkle {
+  0% { filter: brightness(0.85) saturate(0.9); }
+  50% { filter: brightness(1.15) saturate(1.2) drop-shadow(0 0 3px rgb(255 220 120 / 0.6)); }
+  100% { filter: brightness(0.95) saturate(1); }
+}
+
+/* Falling snow */
+.snowflake {
+  position: absolute;
+  top: -5vh;
+  color: #b9cadd;
+  text-shadow: 0 0 2px rgb(120 150 180 / 0.35);
+  animation-name: snow-fall, snow-sway;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  animation-direction: normal, alternate;
+  will-change: transform;
+}
+.dark .snowflake {
+  color: rgb(255 255 255 / 0.85);
+  text-shadow: 0 0 4px rgb(255 255 255 / 0.4);
+}
+@keyframes snow-fall {
+  from { translate: 0 0; }
+  to { translate: 0 112vh; }
+}
+@keyframes snow-sway {
+  from { transform: translateX(-12px) rotate(0deg); }
+  to { transform: translateX(12px) rotate(180deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .snowfall { display: none; }
+  .xmas-lights-glow { animation: none; }
+}

@@ -24,7 +24,7 @@ export function StarRating({ value, onChange, size = 18, className = '' }: Props
           <Star
             size={size}
             strokeWidth={1.75}
-            className={filled ? 'fill-amber-400 text-amber-500' : 'text-stone-300 dark:text-stone-600'}
+            className={filled ? 'fill-gold-400 text-gold-500' : 'text-stone-300 dark:text-stone-600'}
           />
         );
         return onChange ? (

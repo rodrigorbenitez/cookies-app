@@ -200,7 +200,7 @@ export function ShoppingListPage() {
         <section className="card mb-5 p-3">
           <div className="mb-2 flex items-center justify-between px-1">
             <h2 className="text-sm font-semibold tracking-wide text-stone-500 uppercase">{t.shop.fromRecipes}</h2>
-            <button className="text-sm font-medium text-amber-700 hover:underline dark:text-amber-400" onClick={addMoreRecipes}>
+            <button className="text-sm font-medium text-brand-700 hover:underline dark:text-brand-400" onClick={addMoreRecipes}>
               {t.shop.changeRecipes}
             </button>
           </div>
@@ -246,7 +246,7 @@ export function ShoppingListPage() {
             if (!catItems.length) return null;
             return (
               <section key={cat}>
-                <h2 className="mb-1.5 px-1 text-sm font-semibold tracking-wide text-amber-800 uppercase dark:text-amber-400">
+                <h2 className="mb-1.5 px-1 text-sm font-semibold tracking-wide text-pine-700 uppercase dark:text-pine-300">
                   {t.categories[cat]}
                 </h2>
                 <ul className="card divide-y divide-stone-900/5 overflow-hidden dark:divide-white/5">

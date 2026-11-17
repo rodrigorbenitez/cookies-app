@@ -34,8 +34,8 @@ export function CookingModePage() {
     });
 
   return (
-    <div className="cooking min-h-dvh bg-cream-50 dark:bg-cocoa-950">
-      <header className="pt-safe sticky top-0 z-10 border-b border-stone-900/5 bg-cream-50/90 backdrop-blur dark:border-white/5 dark:bg-cocoa-950/90">
+    <div className="cooking min-h-dvh bg-cream-50 dark:bg-night-950">
+      <header className="pt-safe sticky top-0 z-10 border-b border-stone-900/5 bg-cream-50/90 backdrop-blur dark:border-white/5 dark:bg-night-950/90">
         <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
           <h1 className="flex-1 truncate font-display text-2xl font-semibold md:text-3xl">{r.title}</h1>
           <span

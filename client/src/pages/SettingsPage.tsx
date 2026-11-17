@@ -1,11 +1,12 @@
 import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, Loader2, Monitor, Moon, Search, Sun, Trash2, Upload } from 'lucide-react';
+import { Download, Loader2, Monitor, Moon, Search, Snowflake, Sun, Trash2, Upload } from 'lucide-react';
 import { api } from '../lib/api';
 import { CATEGORIES, type Category } from '../lib/types';
 import { useI18n, type Lang } from '../lib/i18n';
 import { applyTheme, getTheme, type Theme } from '../lib/theme';
 import { useToast } from '../components/Toast';
+import { setSnowEnabled, useSnowEnabled } from '../lib/snow';
 
 export function SettingsPage() {
   const { t } = useI18n();
@@ -36,7 +37,7 @@ function LanguageSection() {
             lang={value}
             className={`btn py-3 ${
               lang === value
-                ? 'bg-amber-100 text-amber-900 ring-2 ring-amber-600/40 dark:bg-amber-500/15 dark:text-amber-200'
+                ? 'bg-brand-100 text-brand-900 ring-2 ring-brand-600/40 dark:bg-brand-500/15 dark:text-brand-200'
                 : 'btn-secondary'
             }`}
             onClick={() => setLang(value)}
@@ -53,6 +54,7 @@ function LanguageSection() {
 function ThemeSection() {
   const [theme, setTheme] = useState<Theme>(getTheme());
   const { t } = useI18n();
+  const snow = useSnowEnabled();
   const options: { value: Theme; label: string; icon: typeof Sun }[] = [
     { value: 'light', label: t.settings.light, icon: Sun },
     { value: 'dark', label: t.settings.dark, icon: Moon },
@@ -67,7 +69,7 @@ function ThemeSection() {
             key={value}
             className={`btn flex-col py-3 ${
               theme === value
-                ? 'bg-amber-100 text-amber-900 ring-2 ring-amber-600/40 dark:bg-amber-500/15 dark:text-amber-200'
+                ? 'bg-brand-100 text-brand-900 ring-2 ring-brand-600/40 dark:bg-brand-500/15 dark:text-brand-200'
                 : 'btn-secondary'
             }`}
             onClick={() => {
@@ -80,6 +82,24 @@ function ThemeSection() {
           </button>
         ))}
       </div>
+      <label className="mt-4 flex cursor-pointer items-center gap-3">
+        <Snowflake size={20} className="text-sky-500" />
+        <span className="flex-1">
+          <span className="block font-medium">{t.settings.snow}</span>
+          <span className="block text-sm text-stone-500">{t.settings.snowHint}</span>
+        </span>
+        <input
+          type="checkbox"
+          role="switch"
+          className="peer sr-only"
+          checked={snow}
+          onChange={(e) => setSnowEnabled(e.target.checked)}
+        />
+        <span
+          className="relative h-7 w-12 rounded-full bg-stone-300 transition peer-checked:bg-pine-600 peer-focus-visible:ring-2 peer-focus-visible:ring-pine-500/50 after:absolute after:top-1 after:left-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-5 dark:bg-white/20"
+          aria-hidden="true"
+        />
+      </label>
     </section>
   );
 }
@@ -127,7 +147,7 @@ function BackupSection() {
       <label className="mt-3 flex items-center gap-2 text-sm">
         <input
           type="checkbox"
-          className="h-4 w-4 accent-amber-700"
+          className="h-4 w-4 accent-brand-700"
           checked={keepDuplicates}
           onChange={(e) => setKeepDuplicates(e.target.checked)}
         />

@@ -65,7 +65,7 @@ Perfekt für den bunten Teller in der #adventszeit.`,
 3. **20 Minuten** langsam erhitzen – er darf **nicht kochen**, sonst verfliegt der Alkohol und er wird bitter.
 4. Abschmecken und nach Belieben mit Zucker oder Honig nachsüßen.
 
-Heiß in Tassen servieren. Mit einem Schuss Rum wird daraus die #party-Version.`,
+Heiß in Tassen servieren. Mit einem Schuss Rum wird er zum Hit auf jeder #party.`,
     ingredientGroups: [
       {
         name: '',

@@ -21,7 +21,7 @@ export function IngredientList({ groups, factor, checked, onToggle, large }: Pro
         <section key={g.id}>
           {g.name && (
             <h3
-              className={`mb-2 font-display font-semibold text-amber-800 dark:text-amber-300 ${large ? 'text-2xl' : 'text-lg'}`}
+              className={`mb-2 font-display font-semibold text-pine-700 dark:text-pine-300 ${large ? 'text-2xl' : 'text-lg'}`}
             >
               {g.name}
             </h3>

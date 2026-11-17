@@ -11,6 +11,7 @@ import {
   Search,
   ShoppingBasket,
   SlidersHorizontal,
+  TreePine,
   X,
 } from 'lucide-react';
 import { api, imageUrl } from '../lib/api';
@@ -96,6 +97,17 @@ export function RecipeListPage() {
 
   return (
     <div>
+      {filterCount === 0 && (
+        <div className="mb-4 flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-pine-100 dark:bg-pine-500/15">
+            <TreePine className="text-pine-700 dark:text-pine-300" size={24} />
+          </span>
+          <div>
+            <p className="font-display text-2xl leading-tight font-semibold text-brand-700 dark:text-brand-400">{t.list.greeting}</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400">{t.list.greetingSub}</p>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-stone-400" size={18} />
@@ -109,7 +121,7 @@ export function RecipeListPage() {
           />
         </div>
         <button
-          className={`btn-secondary relative px-3 ${showFilters ? 'ring-2 ring-amber-600/40' : ''}`}
+          className={`btn-secondary relative px-3 ${showFilters ? 'ring-2 ring-brand-600/40' : ''}`}
           onClick={() => setShowFilters((v) => !v)}
           aria-expanded={showFilters}
           aria-label={t.list.filtersAria}
@@ -117,13 +129,13 @@ export function RecipeListPage() {
           <SlidersHorizontal size={18} />
           <span className="hidden sm:inline">{t.list.filters}</span>
           {filterCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-700 px-1 text-xs text-white">
+            <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-700 px-1 text-xs text-white">
               {filterCount}
             </span>
           )}
         </button>
         <button
-          className={`btn-secondary px-3 ${selection.active ? 'bg-amber-700! text-white!' : ''}`}
+          className={`btn-secondary px-3 ${selection.active ? 'bg-brand-700! text-white!' : ''}`}
           onClick={() => selection.setActive(!selection.active)}
           aria-pressed={selection.active}
           title={t.list.selectTitle}
@@ -150,7 +162,7 @@ export function RecipeListPage() {
                       onClick={() => toggleTag(tag)}
                       className={`rounded-full px-3 py-1 text-sm font-medium transition ${
                         on
-                          ? 'bg-amber-700 text-white dark:bg-amber-600'
+                          ? 'bg-brand-700 text-white dark:bg-brand-600'
                           : 'bg-stone-200/70 text-stone-700 hover:bg-stone-300/70 dark:bg-white/10 dark:text-stone-200'
                       }`}
                     >
@@ -257,7 +269,7 @@ export function RecipeListPage() {
         <Link
           to="/recipes/new"
           aria-label={t.list.newRecipe}
-          className="fixed right-4 bottom-20 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-amber-700 text-white shadow-lg shadow-amber-900/30 active:scale-95 md:hidden dark:bg-amber-600"
+          className="fixed right-4 bottom-20 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-brand-700 text-white shadow-lg shadow-brand-900/30 active:scale-95 md:hidden dark:bg-brand-600"
           style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
         >
           <Plus size={26} />
@@ -276,6 +288,7 @@ function EmptyState({ filtered }: { filtered: boolean }) {
   const { t } = useI18n();
   return (
     <div className="py-16 text-center">
+      <TreePine className="mx-auto mb-3 text-pine-600/60 dark:text-pine-400/60" size={56} strokeWidth={1.25} />
       <p className="font-display text-xl text-stone-700 dark:text-stone-200">
         {filtered ? t.list.emptyFilteredTitle : t.list.emptyTitle}
       </p>
@@ -304,7 +317,7 @@ function RecipeCard({ recipe, onTag }: { recipe: RecipeSummary; onTag: (tag: str
   return (
     <article
       className={`card group relative flex cursor-pointer flex-col overflow-hidden transition hover:shadow-md ${
-        selected ? 'ring-2! ring-amber-600!' : ''
+        selected ? 'ring-2! ring-brand-600!' : ''
       }`}
       onClick={open}
     >
@@ -313,7 +326,7 @@ function RecipeCard({ recipe, onTag }: { recipe: RecipeSummary; onTag: (tag: str
         {selection.active && (
           <span
             className={`absolute top-2 left-2 flex h-7 w-7 items-center justify-center rounded-full border-2 shadow ${
-              selected ? 'border-amber-600 bg-amber-600 text-white' : 'border-white bg-black/20 text-transparent'
+              selected ? 'border-brand-600 bg-brand-600 text-white' : 'border-white bg-black/20 text-transparent'
             }`}
             role="checkbox"
             aria-checked={selected}
@@ -344,7 +357,7 @@ function RecipeCard({ recipe, onTag }: { recipe: RecipeSummary; onTag: (tag: str
             {recipe.tags.slice(0, 4).map((t) => (
               <button
                 key={t}
-                className="text-xs font-medium text-amber-800 hover:underline dark:text-amber-300"
+                className="text-xs font-medium text-pine-700 hover:underline dark:text-pine-300"
                 onClick={(e) => {
                   e.stopPropagation();
                   onTag(t);
@@ -383,7 +396,7 @@ function SelectionBar() {
   const summary = useMemo(() => t.selection.count(count), [count, t]);
 
   return (
-    <div className="pb-safe fixed inset-x-0 bottom-0 z-50 border-t border-stone-900/10 bg-cream-50 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-cocoa-900">
+    <div className="pb-safe fixed inset-x-0 bottom-0 z-50 border-t border-stone-900/10 bg-cream-50 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-night-900">
       <div className="mx-auto max-w-3xl px-4 py-3">
         {expanded && count > 0 && (
           <ul className="mb-3 max-h-64 space-y-2 overflow-auto">

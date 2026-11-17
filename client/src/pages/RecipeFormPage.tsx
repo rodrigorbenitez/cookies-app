@@ -305,7 +305,7 @@ export function RecipeFormPage() {
                 </ul>
                 <button
                   type="button"
-                  className="btn-ghost mt-2 px-2 text-amber-800 dark:text-amber-300"
+                  className="btn-ghost mt-2 px-2 text-brand-800 dark:text-brand-300"
                   onClick={() => updateGroup(g.key, (x) => ({ ...x, ingredients: [...x.ingredients, emptyIngredient()] }))}
                 >
                   <Plus size={18} /> {t.form.addIngredient}
@@ -407,7 +407,7 @@ function IngredientRowEditor({
             autoFocus={!row.note}
           />
         ) : (
-          <button type="button" className="mr-auto px-1 text-sm text-stone-500 hover:text-amber-700" onClick={() => setShowNote(true)}>
+          <button type="button" className="mr-auto px-1 text-sm text-stone-500 hover:text-brand-700" onClick={() => setShowNote(true)}>
             {t.form.addNote}
           </button>
         )}
@@ -479,7 +479,7 @@ function InstructionsEditor({ value, onChange }: { value: string; onChange: (v: 
         )}
         <button
           type="button"
-          className={`btn-ghost px-3 ${preview ? 'bg-amber-100 dark:bg-amber-500/15' : ''}`}
+          className={`btn-ghost px-3 ${preview ? 'bg-brand-100 dark:bg-brand-500/15' : ''}`}
           onClick={() => setPreview((v) => !v)}
           aria-pressed={preview}
         >

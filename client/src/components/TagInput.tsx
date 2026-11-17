@@ -33,7 +33,7 @@ export function TagInput({ value, onChange, suggestions }: Props) {
               <button
                 type="button"
                 aria-label={t.form.removeTag(tag)}
-                className="-mr-1 rounded-full p-0.5 hover:bg-amber-200 dark:hover:bg-amber-500/30"
+                className="-mr-1 rounded-full p-0.5 hover:bg-pine-200 dark:hover:bg-pine-500/30"
                 onClick={() => onChange(value.filter((x) => x !== tag))}
               >
                 <X size={14} />

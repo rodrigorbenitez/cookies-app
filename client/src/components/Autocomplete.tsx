@@ -86,7 +86,7 @@ export function Autocomplete({
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-30 mt-1 max-h-60 w-full min-w-48 overflow-auto rounded-xl bg-white py-1 shadow-lg ring-1 ring-stone-900/10 dark:bg-cocoa-800 dark:ring-white/10"
+          className="absolute z-30 mt-1 max-h-60 w-full min-w-48 overflow-auto rounded-xl bg-white py-1 shadow-lg ring-1 ring-stone-900/10 dark:bg-night-800 dark:ring-white/10"
         >
           {matches.map((o, i) => (
             <li
@@ -94,7 +94,7 @@ export function Autocomplete({
               role="option"
               aria-selected={i === active}
               className={`cursor-pointer px-3 py-2 text-sm ${
-                i === active ? 'bg-amber-100 dark:bg-amber-500/20' : ''
+                i === active ? 'bg-brand-100 dark:bg-brand-500/20' : ''
               }`}
               onMouseDown={(e) => {
                 e.preventDefault();
